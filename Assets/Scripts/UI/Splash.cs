@@ -64,12 +64,14 @@ public class Splash : MonoBehaviour, IEventListener<FXArgs>, IEventListener<Fade
 
     private void PlaySplash()
     {
+        Debug.Log("Play splash " + type.ToString());
         if (type.Equals(SplashType.Video))
         {
             playVideoclip.Raise(new MediaPlayerArgs { clip = 0, rawImage = rawImage, loop = false, fitScreenSize = true });
         }
         else if (type.Equals(SplashType.Image))
         {
+            Debug.Log("image");
             playAudioclip.Raise(new FXArgs { type = "audioclip", clip = splashAudioclip });
         }
     }

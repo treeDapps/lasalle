@@ -69,7 +69,7 @@ public class Navigator : MonoBehaviour, IEventListener<ScreenshotArgs>
     IEnumerator corout_(float delay, int inPanel, string direction)
     {
         Debug.Log("in panel " + inPanel);
-        backButton.SetActive(inPanel == 0 ? false : true);
+        //backButton.SetActive(inPanel == 0 ? false : true);
         if (direction == "back" && inPanel == 1)
         {
             faderEvent.Raise(new FaderArgs { faderTrigger = "out" });

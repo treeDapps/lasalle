@@ -1,21 +1,37 @@
+using AuraXR.EventSystem;
 using System.Collections;
-using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEditor.Purchasing;
 
-public class GP_Reticle : MonoBehaviour
+public class GP_Reticle : EventListener<ARArgs>
 {
     [SerializeField] AREvent arEvent;
     public Transform reticle;
     public GameObject prefabToInstantiate;
     public UnityEvent setPrefabEvent;
     public UnityEvent foundGroundEvent;
-    bool instantiated;
-    bool hasGround = false;
+    public bool instantiated;
+    public bool hasGround = false;
+    public bool instantiateAssetBundle = true;
+    public bool downloading = false;
 
+    void Awake()
+    {
+        downloading = instantiateAssetBundle ? true : false;
+        if(instantiateAssetBundle)
+        {
+            arEvent.Raise(new ARArgs
+            {
+                arAction = "loadScreen",
+                boolean = true
+            });
+        }
+    }
     void FixedUpdate()
     {
-        if (instantiated)
+        if (instantiated || downloading)
             return;
         SetGPReticle();
         SetPrefab();
@@ -29,14 +45,39 @@ public class GP_Reticle : MonoBehaviour
             StartCoroutine(corout_SetPrefab());
         }
     }
-
+    [Button]
+    public void Test()
+    {
+        if (!instantiated)
+        {
+            instantiated = true;
+            StartCoroutine(corout_SetPrefab());
+        }
+    }
     private IEnumerator corout_SetPrefab()
     {
-        GameObject instantiatedPrefab = GameObject.Instantiate(prefabToInstantiate);
-        yield return new WaitUntil(() => instantiatedPrefab != null);
-        instantiatedPrefab.transform.position = reticle.position;
-        setPrefabEvent.Invoke();
-        arEvent.Raise(new ARArgs { arAction = "placedObject", spawnedObject = instantiatedPrefab.transform });
+        if (!instantiateAssetBundle)
+        {
+            GameObject instantiatedPrefab = GameObject.Instantiate(prefabToInstantiate);
+            yield return new WaitUntil(() => instantiatedPrefab != null);
+            instantiatedPrefab.transform.position = reticle.position;
+            setPrefabEvent.Invoke();
+
+            arEvent.Raise(new ARArgs
+            {
+                arAction = "placedObject",
+                spawnedObject = instantiatedPrefab.transform
+            });
+        }
+        else
+        {
+            setPrefabEvent.Invoke();
+            arEvent.Raise(new ARArgs
+            {
+                arAction = "instantiateAssetBundle",
+                position = reticle.position
+            }); ;
+        }
         Handheld.Vibrate();
         yield return new WaitForSeconds(1);
         reticle.gameObject.SetActive(false);
@@ -77,5 +118,27 @@ public class GP_Reticle : MonoBehaviour
         }
         else
             return hit;
+    }
+
+    protected override void OnEnable()
+    {
+        arEvent.RegisterListener(this);
+    }
+
+    protected override void OnDisable()
+    {
+        arEvent.UnregisterListener(this);
+    }
+
+    public override void OnEventRaised(ARArgs data)
+    {
+        if (data.arAction.Equals("loadScreen"))
+        {
+            if(data.boolean == false)
+            {
+                Debug.Log("Start scanning floor!");
+                downloading = false;
+            }
+        }
     }
 }

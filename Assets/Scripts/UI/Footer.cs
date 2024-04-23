@@ -11,8 +11,8 @@ public class Footer : PanelUI, IEventListener<SceneArgs>
     void Start()
     {
         canvas.enabled = false;
-        buttons[1].SetActive(false);
-        buttons[0].SetActive(true);
+        //buttons[1].SetActive(false);
+        //buttons[0].SetActive(true);
     }
     void OnEnable()
     {

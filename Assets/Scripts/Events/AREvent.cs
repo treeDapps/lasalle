@@ -13,4 +13,6 @@ public class ARArgs
 {
     public string arAction;
     public Transform spawnedObject;
+    public Vector3 position;
+    public bool boolean;
 }

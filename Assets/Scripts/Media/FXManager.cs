@@ -42,7 +42,9 @@ public class FXManager : MonoBehaviour, IEventListener<FXArgs>
 
     private IEnumerator corout_AudioHasFinished()
     {
+        Debug.Log("play sfx "+ player.clip.length);
         yield return new WaitForSeconds(player.clip.length);
+        Debug.Log("finished ");
         audioclipEvent.Raise(new FXArgs { finished = true});
     }
 }

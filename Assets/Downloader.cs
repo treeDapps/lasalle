@@ -1,9 +1,10 @@
+using AuraXR.EventSystem;
 using Sirenix.OdinInspector;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class Downloader : MonoBehaviour
+public class Downloader : EventListener<ARArgs>
 {
     // URL del archivo AssetBundle en el servidor
     public string assetBundleURL = "https://api.auraxr.com/storage/1sdH5H53lQ/iSpYMnKtxq.";
@@ -11,6 +12,9 @@ public class Downloader : MonoBehaviour
     // Nombre del asset en el AssetBundle que quieres instanciar
     public string assetName = "nombre-del-asset";
     public GameObject father;
+    public bool instantiate;
+    [SerializeField] AREvent arEvent;
+    [SerializeField] Vector3 position;
     // Inicia la descarga y carga del AssetBundle
     void Start()
     {
@@ -86,11 +90,41 @@ public class Downloader : MonoBehaviour
                 yield break;
             }
 
+            Debug.Log("Downloaded asset bundle!");
+            // Aca ya tengo el bundle, debo quitar el loader
+            arEvent.Raise(new ARArgs
+            {
+                arAction = "loadScreen",
+                boolean = false
+            });
+
+            yield return new WaitUntil(() => instantiate);
+            Debug.Log("Instantiate asset bundle in: " + position);
+            instantiate = false;
             // Instanciar el objeto en la escena
             Instantiate(assetToInstantiate);
 
             // Liberar el AssetBundle cuando ya no se necesite para ahorrar memoria
             bundle.Unload(false);
+        }
+    }
+
+    protected override void OnEnable()
+    {
+        arEvent.RegisterListener(this);
+    }
+
+    protected override void OnDisable()
+    {
+        arEvent.UnregisterListener(this);
+    }
+
+    public override void OnEventRaised(ARArgs data)
+    {
+        if(data.arAction.Equals("instantiateAssetBundle"))
+        {
+            instantiate = true;
+            position = data.position;
         }
     }
 }

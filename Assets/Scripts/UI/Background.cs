@@ -12,7 +12,7 @@ public class Background : MonoBehaviour, IEventListener
     [SerializeField] SceneEvent sceneEvent;
 
     [SerializeField] Animator animator;
-    Canvas canvas;
+    [SerializeField] Canvas canvas;
 
     void Start()
     {
@@ -54,7 +54,10 @@ public class Background : MonoBehaviour, IEventListener
 
     public void OnEventRaised(SceneArgs arg0)
     {
-        if(arg0.sceneAction == "arloaded") canvas.enabled = false;
+        Debug.Log("********* BAckground" + this.name);
+        canvas = null;
+        canvas = GetComponent<Canvas>();
+        if (arg0.sceneAction == "arloaded") canvas.enabled = false;
         else if (arg0.sceneAction == "uiloaded") canvas.enabled = true;
     }
 }
